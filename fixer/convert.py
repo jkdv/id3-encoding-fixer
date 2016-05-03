@@ -14,7 +14,7 @@ def fix_save_batch(path, recursive=False):
 
     if os.path.isdir(path):
         pathlist = glob.glob(os.path.join(path, '*.mp3'), recursive=recursive)
-        for p in pathlist:
+        for p in sorted(pathlist):
             fix_save(p)
     elif os.path.isfile(path):
         fix_save(path)
@@ -33,12 +33,28 @@ def fix_save(path):
         for value in values:
             try:
                 raw = value.encode(encoding='cp1252')
+                exaggerated_raw = raw
+                assert isinstance(raw, bytes)
+                for i in range(10):
+                    exaggerated_raw += raw
             except UnicodeEncodeError:
                 continue
-            encoding = chardet.detect(raw)
-            newvalue = raw.decode(encoding=encoding['encoding'])
-            fixed_values.append(newvalue)
-        audio[tag] = fixed_values
+
+            detected = chardet.detect(exaggerated_raw)
+            confidence = detected['confidence']
+            encoding = 'EUC-KR'
+            if confidence > 0.8:
+                encoding = detected['encoding']
+
+            try:
+                decoded_text = raw.decode(encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+
+            fixed_values.append(decoded_text)
+
+        if len(fixed_values) > 0:
+            audio[tag] = fixed_values
 
     try:
         audio.save()
