@@ -5,12 +5,12 @@
 * mutagen
 
 
-## Usage
-### Install dependencies
+# Usage
+## Install dependencies
 ```
 $ pip install chardet mutagen
 ```
-### Run if encoding is unknown.
+## Run if encoding is unknown.
 ```
 $ python3 -m ief -R /path/to/mp3
 ```
