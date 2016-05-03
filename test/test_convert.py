@@ -11,7 +11,7 @@ class ConvertCase(unittest.TestCase):
         # self.fail()
 
     def test_encode(self):
-        raw = 'Á¤ÀºÁöÁ¤ÀºÁöÁ¤ÀºÁöÁ¤ÀºÁöÁ¤ÀºÁöÁ¤ÀºÁö'.encode(encoding='cp1252')
+        raw = 'Õµ¥ÀÌ Å°Áî - ³ÊÀÇ ¸ñ¼Ò¸®'.encode(encoding='cp1252')
         encoding = chardet.detect(raw)
 
         text = raw.decode(encoding='EUC-KR')
