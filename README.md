@@ -1,5 +1,10 @@
 # ID3 Encoding Fixer
 
+# Dependancies
+* chardet
+* mutagen
+
 
 ## Usage
-$ ./ief -R /path/to/mp3
+$ pip install chardet mutagen
+$ python3 -m ief -R /path/to/mp3
