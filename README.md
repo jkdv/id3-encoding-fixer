@@ -1,4 +1,5 @@
 # ID3 Encoding Fixer
+ID3 Encoding Fixer converts encoding of ID3 tags in MP3 files to the right one.
 
 ## Dependencies
 * chardet
