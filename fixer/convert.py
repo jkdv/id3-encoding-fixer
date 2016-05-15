@@ -3,6 +3,7 @@ import os
 
 import chardet
 from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3NoHeaderError
 
 
 class ConvertException(Exception):
@@ -13,12 +14,23 @@ def fix_save_batch(path, encoding=None, recursive=False):
     assert isinstance(path, str)
     assert isinstance(encoding, str) or encoding is None
 
-    if os.path.isdir(path):
+    if os.path.isdir(path) and not recursive:
         pathlist = glob.glob(os.path.join(path, '*.mp3'), recursive=recursive)
         for p in sorted(pathlist):
             fix_save(p, encoding)
+
+    elif os.path.isdir(path) and recursive:
+        for dirpath, dirnames, filenames in os.walk(path):
+            for name in filenames:
+                fullpath = os.path.join(dirpath, name)
+                _, extension = os.path.splitext(fullpath)
+                if extension.lower() != '.mp3':
+                    continue
+                fix_save(fullpath, encoding)
+
     elif os.path.isfile(path):
         fix_save(path, encoding)
+
     else:
         raise ConvertException('Path given is not a file nor a directory.')
 
@@ -29,27 +41,31 @@ def fix_save(path, encoding):
     if not os.path.isfile(path):
         raise ConvertException('Path given is not a file.')
 
-    audio = EasyID3(path)
-    label = 'SUCCESS'
-
-    for tag, values in audio.items():
-        fixed_values = list()
-        for value in values:
-            try:
-                decoded_text = convert_encoding(value, encoding)
-            except UnicodeEncodeError:
-                continue
-            except UnicodeDecodeError:
-                continue
-            fixed_values.append(decoded_text)
-
-        if len(fixed_values) > 0:
-            audio[tag] = fixed_values
-
     try:
-        audio.save()
-    except IOError:
-        label = 'FAIL'
+        audio = EasyID3(path)
+    except ID3NoHeaderError:
+        label = 'NO ID3'
+    else:
+        label = 'SUCCESS'
+
+        for tag, values in audio.items():
+            fixed_values = list()
+            for value in values:
+                try:
+                    decoded_text = convert_encoding(value, encoding)
+                except UnicodeEncodeError:
+                    continue
+                except UnicodeDecodeError:
+                    continue
+                fixed_values.append(decoded_text)
+
+            if len(fixed_values) > 0:
+                audio[tag] = fixed_values
+
+        try:
+            audio.save()
+        except IOError:
+            label = 'FAIL'
 
     print_msg(label, path)
 
