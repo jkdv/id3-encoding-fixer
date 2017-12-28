@@ -57,6 +57,10 @@ def fix_save(path, encoding):
                     continue
                 except UnicodeDecodeError:
                     continue
+                except LookupError:
+                    continue
+                except AssertionError:
+                    continue
                 fixed_values.append(decoded_text)
 
             if len(fixed_values) > 0:
@@ -84,10 +88,13 @@ def convert_encoding(text, encoding=None):
             exaggerated_raw += raw
         detected = chardet.detect(exaggerated_raw)
         encoding = detected['encoding']
+        assert isinstance(encoding, str)
 
         try:
             decoded_text = raw.decode(encoding=encoding)
         except UnicodeDecodeError as e:
+            raise e
+        except LookupError as e:
             raise e
 
     else:
